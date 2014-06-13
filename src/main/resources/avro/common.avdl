@@ -28,30 +28,37 @@ protocol GACommon {
   
   /**
     An abstraction for referring to a genomic position, in relation to some
-    already known reference. For now, represents a genomic position as a contig
-    name, a base number on that contig (0-based), and a flag to say if it's the
-    forward or reverse strand that we're talking about.
-    
-    TODO: Add support here for universally unique base IDs.
+    already known reference. Must have a unique 64-bit id, and a strand flag
+    (forward or reverse). Optionally also carries a contig name, and a base
+    number on that contig (0-based).
   */
   record GAPosition {
     /**
       The name of the contig (or, more technically, the scaffold) in whatever
       reference is being used. Does not generally include a "chr" prefix, so for
       example "X" would be used for the X chromosome.
+      
+      If contig is specified, position must be specified, and visa versa.
     */
-    string contig;
+    union { null, string } contig = null;
     
     /**
       The 0-based offset from the start of the forward strand for that contig.
+      
+      If position is specified, then contig must be specified, and visa versa.
     */
-    long position;
+    union { null, long } position = null;
+    
+    /**
+      Unique 64-bit ID for this base.
+    */
+    long id;
     
     /**
       A flag to indicate if we are on the forward strand (false) or reverse
       strand (true).
     */
-    boolean reverseStrand;
+    boolean reverseStrand = false;
     
   }
   
