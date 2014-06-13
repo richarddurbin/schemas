@@ -106,13 +106,10 @@ record GAVariant {
   // The date this variant was created in milliseconds from the epoch.
   union { null, long } created = null;
 
-  // The reference sequence on which this variant occurs. (e.g. 'chr20' or 'X')
-  string referenceSequenceName;
-
-  // The position at which this variant occurs (0-based).
-  // This corresponds to the first base of the string of reference bases.
-  long position;
-
+  // The position at which this variant occurs in the reference. Must be on the
+  // forward strand.
+  GAPosition position;
+  
   // The reference bases for this variant. They start at the given
   // position.
   string referenceBases;
