@@ -2,6 +2,49 @@
 protocol GAVariants {
 
 import idl "reads.avdl";
+import idl "referenceStructure.avdl";
+
+/** 
+  Represents some subgraph that replaces the primary path between a pair of
+  positions on the primary path.
+  
+  ```
+              +--------+
+              |GAAllele|
+              +--------+---------------+
+              |   Variant ________     |
+              |   _______/________\    |
+    Start ____|__/            /____\___|_____ End
+          \   |  \___________/         |    /
+           \  +------------------------+   /
+            \_____________________________/
+                    Primary Path
+  ```
+  
+  
+*/
+record GAAllele {
+  /**
+    The threads which should be joined together to produce the graph
+    representing the allele. Threads are joined when the endpoint of one thread
+    matches a position in another. After this, all threads must be connected. At
+    least one thread must end at (or start with) each of the primary path
+    positions.
+    
+    TODO: This isn't sufficient generality. Every time a thread attaches, the
+    whole graph collapses to that point. We need allele-local coordinate space
+    for making these graphs.
+    
+    An allele with a perfectly know structure will contain just a single thread
+    from one primary path position to the other, while an allele with internal
+    uncertainties will contain a graph in which the actual path present in the
+    sample is known to be embedded.
+    
+    In the SNP case, this will be a single thread from the primary path, through
+    a 1-base block, and back to the primary path.
+  */
+  array<GAThread> subthreads;
+}
 
 // Variants and CallSamples both belong to a VariantSet.
 // VariantSets belong to a Dataset.
@@ -106,16 +149,32 @@ record GAVariant {
   // The date this variant was created in milliseconds from the epoch.
   union { null, long } created = null;
 
-  // The position at which this variant occurs in the reference. Must be on the
-  // forward strand.
-  GAPosition position;
+  /** 
+    The position at which the variant starts in the reference. Must be a 5'
+    position, and on the primary path, since you read into variants on the
+    primary path from the left.
+  */
+  GAPosition start;
   
-  // The reference bases for this variant. They start at the given
-  // position.
+  /** 
+    The position at which the variant ends in the reference, and the primary
+    path resumes. Must be a 3' position on the primary path, since you read out
+    of variants on the primary path on the right.
+  */
+  GAPosition end;
+  
+  /**
+    The reference bases for this variant. Must be the reading of the primary
+    path from the start position to the end position.
+  */
   string referenceBases;
 
-  // The bases that appear instead of the reference bases.
-  array<string> alternateBases = [];
+  /**
+    The different subgraphs which may appear here instead of the reference
+    bases. Should be single-thread subgraphs unless a variant with uncertain
+    internal structure is called.
+  */
+  array<GAAllele> alternateAlleles = [];
 
   // A map of additional variant information.
   array<GAKeyValue> info = [];
