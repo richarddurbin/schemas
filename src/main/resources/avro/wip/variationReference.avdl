@@ -1,4 +1,4 @@
-@namespace("org.ga4gh.wip")
+@namespace("org.ga4gh")
 
 /**
 A sequence graph is made progressively joining new sequence pieces, which we
