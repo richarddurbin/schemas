@@ -376,6 +376,8 @@ record Call {
   The copy number data that occurs later may not contradict that by e.g. listing
   a nonzero probability for a copy number less than n.
   
+  Only `Calls` in the same `CallSet` may be part of the same traversal.
+  
   TODO: Is there a way to do this while allowing some things in the traversal to
   maybe not exist?
   */

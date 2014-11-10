@@ -2,24 +2,85 @@
 protocol VariationReferenceMethods {
 
 /*
-Methods for working with a VariationReference, which contains both a graph that
-functions as a reference, and call sets on samples. TODO: import things like
-reference sets and sample stuff from references and variants APIs.
+Methods for working with a `VariationReference` (a graph that functions as a
+reference) and `CallSets` on samples relative to such a reference.
 */
 
 import idl "../common.avdl";
 import idl "variationReference.avdl";
+
+/******************  /graph/variantsets/search  *********************/
+/**
+This request maps to the body of `POST /graph/variantsets/search` as JSON.
+*/
+record SearchVariantSetsRequest {
+
+  /**
+  If specified, will restrict the query to variant sets within the
+  given datasets.
+  */
+  array<string> datasetIds = [];
+  
+  /**
+  If specified, will restrict the query to variant sets with this exact ID.
+  */
+  union { null, string } variantSetId = null;
+  
+  /**
+  Specifies the maximum number of results to return in a single page.
+  If unspecified, a system default will be used.
+  */
+  union { null, int } pageSize = null;
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  To get the next page of results, set this parameter to the value of
+  `nextPageToken` from the previous response.
+  */
+  union { null, string } pageToken = null;
+}
+
+/**
+This is the response from `POST /graph/variantsets/search` expressed as JSON.
+*/
+record SearchVariantSetsResponse {
+  /** The list of matching variants. */
+  array<Variant> variants = [];
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  Provide this value in a subsequent request to return the next page of
+  results. This field will be empty if there aren't any additional results.
+  */
+  union { null, string } nextPageToken = null;
+}
+
+/**
+Gets a list of `VariantSet`s matching the search criteria.
+
+`POST /graph/variantsets/search` must accept a JSON version of
+`SearchVariantSetsRequest` as the post body and will return a JSON version
+of `SearchVariantSetsResponse`.
+*/
+SearchVariantSetsResponse searchVariantSets(
+    /**
+    This request maps to the body of `POST /graph/variantsets/search` as JSON.
+    */
+    SearchVariantSetsRequest request) throws org.ga4gh.GAException;
 
 /******************  /graph/variants/search  *********************/
 /** This request maps to the body of `POST /graph/variants/search` as JSON. */
 record SearchVariantsRequest {
 
   /**
-  Only return variants joined onto the given variant at the given position in
-  the given orientation.
+  Only return variants defined in the specified `VariationReference`.
   */
-  union { null, VariantJoinLocation } joinLocation = null;
+  union { null, string } variationReferenceId;
   
+  /**
+  Only return variants defined in the specified `VariantSet`.
+  */
+  union { null, string } variantSetId;
   
   /**
   Only return the variants with the given ID.
@@ -56,7 +117,7 @@ record SearchVariantsResponse {
 }
 
 /**
-Gets a list of `Variant` matching the search criteria.
+Gets a list of `Variant`s matching the search criteria.
 
 `POST /graph/variants/search` must accept a JSON version of
 `SearchVariantsRequest` as the post body and will return a JSON version
@@ -68,56 +129,6 @@ SearchVariantsResponse searchVariants(
     */
     SearchVariantsRequest request) throws org.ga4gh.GAException;
 
-/******************  /graph/alleles/search  *********************/
-/** This request maps to the body of `POST /graph/alleles/search` as JSON. */
-record SearchAllelesRequest {
-  /**
-  Only return the allele with the given ID.
-  */
-  union { null, string } alleleId = null;
-
-  /**
-  Specifies the maximum number of results to return in a single page.
-  If unspecified, a system default will be used.
-  */
-  union { null, int } pageSize = null;
-
-  /**
-  The continuation token, which is used to page through large result sets.
-  To get the next page of results, set this parameter to the value of
-  `nextPageToken` from the previous response.
-  */
-  union { null, string } pageToken = null;
-}
-
-/**
-This is the response from `POST /graph/alleles/search` expressed as JSON.
-*/
-record SearchAllelesResponse {
-  /** The list of matching alleles. */
-  array<Allele> alleles = [];
-
-  /**
-  The continuation token, which is used to page through large result sets.
-  Provide this value in a subsequent request to return the next page of
-  results. This field will be empty if there aren't any additional results.
-  */
-  union { null, string } nextPageToken = null;
-}
-
-/**
-Gets a list of `Allele` matching the search criteria.
-
-`POST /graph/alleles/search` must accept a JSON version of
-`SearchAllelesRequest` as the post body and will return a JSON version
-of `SearchAllelesResponse`.
-*/
-SearchAllelesResponse searchAlleles(
-    /**
-    This request maps to the body of `POST /graph/alleles/search` as JSON.
-    */
-    SearchAllelesRequest request) throws org.ga4gh.GAException;
-
 /******************  /graph/callsets/search  *********************/
 /** This request maps to the body of `POST /graph/callsets/search` as JSON. */
 record SearchCallSetsRequest {
@@ -126,6 +137,18 @@ record SearchCallSetsRequest {
   Only return the `CallSet` with exactly this ID.
   */
   union { null, string } callSetId = null;
+  
+  /**
+  Only return call sets for which a substring of the name matches this
+  string.
+  */
+  union { null, string } name = null;  
+  
+  /**
+  If nonempty, will restrict the query to call sets with calls in one of the
+  given variant sets.
+  */
+  array<string> variantSetIds = [];
   
   /**
   Return only `CallSet`s with one of these sampleIds.
@@ -184,14 +207,20 @@ SearchCallSetsResponse searchCallSets(
 record SearchCallsRequest {
 
   /**
-  Only return the `Call`s in these call sets.
+  If nonempty, only return the `Call`s in one of these `CallSet`s. TODO: Do we
+  like this if nonempty pattern? Or should we union these arrays with null?
   */
   array<string> callSetIds = [];
   
   /**
-  Return only `Call`s with one of these `Allele`s.
+  If nonempty, return only `Call`s in of these `VariantSet`s.
   */
-  array<string> alleleIds = [];
+  array<string> variantSetIds = [];
+  
+  /**
+  If nonempty, return only `Call`s that are on one of the specified traversals.
+  */
+  array<string> traversalIds = [];
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -233,16 +262,17 @@ SearchCallsResponse searchCalls(
     /** This request maps to the body of `POST /graph/calls/search` as JSON. */
     SearchCallsRequest request) throws org.ga4gh.GAException;
 
-/******************  /graph/variantscaffolds/search  *********************/
+/******************  /graph/traversals/search  *********************/
 /**
-This request maps to the body of `POST /graph/variantscaffolds/search` as JSON.
+This request maps to the body of `POST /graph/traversals/search` as JSON.
 */
-record SearchVariantScaffoldsRequest {
+record SearchTraversalsRequest {
 
   /**
-  Only return the `VariantScaffold` with exactly this ID.
+  If specified, return only the IDs of traversals involving calls in one of the
+  specified callsets.
   */
-  union { string, null } variantScaffoldId = null;
+  array<string> callSetIds; 
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -259,12 +289,11 @@ record SearchVariantScaffoldsRequest {
 }
 
 /**
-This is the response from `POST /graph/variantscaffolds/search` expressed as
-JSON.
+This is the response from `POST /graph/traversals/search` expressed as JSON.
 */
-record SearchVariantScaffoldsResponse {
-  /** The list of matching calls. */
-  array<Call> calls = [];
+record SearchTraversalsResponse {
+  /** The list of traversal IDs. */
+  array<string> traversals = [];
 
   /**
   The continuation token, which is used to page through large result sets.
@@ -275,17 +304,17 @@ record SearchVariantScaffoldsResponse {
 }
 
 /**
-Gets a list of `VariantScaffold` matching the search criteria.
+Gets a list of traversal IDs matching the search criteria.
 
-`POST /graph/variantscaffolds/search` must accept a JSON version of
-`SearchVariantScaffoldsRequest` as the post body and will return a JSON
-version of `SearchVariantScaffoldsResponse`.
+`POST /graph/traversals/search` must accept a JSON version of
+`SearchTraversalsRequest` as the post body and will return a JSON
+version of `SearchTraversalsResponse`.
 */
-SearchVariantScaffoldsResponse searchVariantScaffolds(
+SearchTraversalsResponse searchTraversals(
     /**
-    This request maps to the body of `POST /graph/variantscaffolds/search` as
+    This request maps to the body of `POST /graph/traversals/search` as
     JSON.
     */
-    SearchVariantScaffoldsRequest request) throws org.ga4gh.GAException;
+    SearchTraversalsRequest request) throws org.ga4gh.GAException;
 
 }
