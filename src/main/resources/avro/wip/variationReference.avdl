@@ -1,4 +1,4 @@
-@namespace("org.ga4gh")
+@namespace("org.ga4gh.wip")
 
 /**
 A sequence graph is made progressively joining new sequence pieces, which we
@@ -25,6 +25,60 @@ protocol VariationReference {
 import idl "../common.avdl";
 
 /**
+A `VariationReference` is a set of `Variant`s which typically comprise a
+reference assembly, such as `GRCh38`. A `VariationReference` defines a common
+graph coordinate space for comparing reference-aligned experimental data.
+*/
+record VariationReference {
+  /** The variation reference ID. Unique in the repository. */
+  string id;
+
+  // `Variant` objects record their membership in the `VariationReference`,
+  // sicne there will be a lot of them and we probably want to paginate them.
+
+  /**
+  Order-independent MD5 checksum which identifies this `VariationReference`. The
+  checksum is computed by sorting all `md5checksum`s for all `Variant`s in the
+  reference in ascending lexicographic order, concatenating, and taking the MD5
+  of that value.
+  */
+  string md5checksum;
+
+  /**
+  ID from http://www.ncbi.nlm.nih.gov/taxonomy (e.g. 9606->human) indicating
+  the species which this assembly is intended to model. Note that contained
+  `Reference`s may specify a different `ncbiTaxonId`, as assemblies may
+  contain reference sequences which do not belong to the modeled species, e.g.
+  EBV in a human reference genome.
+  */
+  union { null, int } ncbiTaxonId = null;
+
+  /** Optional free text description of this reference set. */
+  union { null, string } description = null;
+
+  // next information about the source of the sequences
+
+  /** Public id of this reference set, such as `GRCh37`. */
+  union { null, string } assemblyId = null;
+
+  /** Specifies a FASTA format file/string. */
+  union { null, string } sourceURI = null;
+
+  /**
+  All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
+  with a version number, e.g. `NC_000001.11`.
+  */
+  array<string> sourceAccessions;
+
+  /**
+  A reference set may be derived from a source if it contains
+  additional sequences, or some of the sequences within it are derived
+  (see the definition of `isDerived` in `Reference`).
+  */
+  boolean isDerived = false;
+}
+
+/**
 PLUS represents forwards, or the direction of increasing coordinates, while
 MINUS represents reverse-complement, or the direction of decreasing coordinates.
 */
@@ -38,24 +92,71 @@ record VariantJoinLocation {
   string variantId; // id of the variant in which this location is based
   int position;     // 0-based
   VariantSide side;
+  
+  /**
+  MD5 of the `md5checksum` of the variant being joined onto, the position as a
+  decimal string, and "+" or "-" as appropriate for the side, in that order.
+  Doesn't always have to be included, really just exists for making sure that
+  the MD5 of a Variant and thus a VariationReference is well-defined.
+  */
+  union { null, string } md5checksum = null;
 }
 
+/**
+Represents a chunk of sequence (possibly joined onto other such chunks) that is
+part of a reference graph.
+*/
 record Variant {
+
+  /** The variant ID. Unique within the repository. */
   string id;
+  
+  /**
+  The ID of the `VariationReference` that this variant belongs to, if any.
+  */
+  union { null, string } variationReferenceId = null;
+  
+  /**
+  The ID of the `VariantSet` that this variant belongs to, if it does not belong
+  to a `VariationReference`.  
+  */
+  union { null, string } variantSetId = null;
+
+  /** The length of this variant's sequence. */
+  long length;
 
   /**
-  Start and end locations of how this variant fits into the existing graph.
-  start and end are {0,0,FORWARD} for a primary sequence. Note that the
-  variantId for start and end may not be the same.
+  MD5 of the upper-case sequence excluding all whitespace characters
+  (this is equivalent to SQ:M5 in SAM).
   */
-  VariantJoinLocation startJoin, endJoin;  
+  string sequenceMd5checksum;
 
+  /**
+  MD5 of the sequenceMd5checksum, the MD5 of the startJoin, and the MD5 of the
+  endJoin, in that order. Note that this means a variant may not join onto
+  itself, or anything that joins onto it, or this hash would not be defined.
+  */
+  string md5checksum;
 
+  /**
+  All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
+  with a version number, e.g. `GCF_000001405.26`.
+  */
+  array<string> sourceAccessions;
+
+  /**
+  Start and end locations of how this variant fits into the existing graph. May
+  be null only for a primary sequence that is not joined onto any other. Note
+  that the variantId for start and end may not be the same.
+  */
+  union { null, VariantJoinLocation } startJoin, endJoin;  
+  
   /**
   The sequence to insert between startJoin and endJoin. We must be able to
   access sequence, but could allow it to be generated from a global identifier
   such as a versioned INSDC accession stored in info. [Propose adding additional
   object to define the latter in common.avdl]
+  TODO: lazy download/pagination of sequence
   */
   string sequence; 
 
@@ -96,96 +197,192 @@ CallSet on the same sample.
 */
 
 /**
-A Segment is a basic piece of sequence from the graph out of which more complex
-things can be made.
+This metadata represents VCF header information. Includes both the field value
+and the information about the field definition, to allow a VCF header to be
+reconstructed.
 */
-record Segment {
+record VariantSetMetadata {
+  /** The top-level key. */
+  string key;
+
+  /** The value field for simple metadata. */
+  string value;
+
   /**
-  References an id of a Variant.
+  User-provided ID field, not enforced by this API.
+  Two or more pieces of structured metadata with identical
+  id and key fields are considered equivalent.
   */
-  string variantId;
-  
+  string id;
+
+  /** The type of data. */
+  string type;
+
   /**
-  start is 0-based and inclusive, end is exclusive. So start <= x < end if end >
-  start, or end < x <= start if end < start. Genomic positions are non-negative
-  integers less than reference length. Segments spanning the join of circular
-  genomes are represented as two segments, one on each side of the join
-  (position 0). If start == 0 and end == 0 then this is the whole Variant, and
-  otherwise we require end != start.
+  The number of values that can be included in a field described by this
+  metadata.
   */
-  int start, end;
-       
-  VariantSide side; 
-  
-  /**
-  Alternatie to end.
-  */
-  int length;
+  string number;
+
+  /** A textual description of this metadata. */
+  string description;
+
+  /** Remaining structured metadata key-value pairs. */
+  map<array<string>> info = {};
 }
 
-/*
-An Allele is a contigous piece of sequence that we will want to say is present
-(in general at some copy number) or absent in a sample.  Very often it will just
-be a variant, but it can also be a segment of the reference, or of another
-variant, or in the general case a contigous series of segments running across
-variant boundaries.
+/**
+A `CallSet` has calls in a `VariantSet`. Some `Variant`s belong to
+`VariantSet`s, while other belong to `VariationReference`s. A `VariantSet`
+belongs to a `Dataset`. The variant set is equivalent to a VCF file.
 */
-record Allele {
-  /**
-  If this Allele is a clean variant, then reuse variantId.
-  */
-  string id;  
+record VariantSet {
+  /** The variant set ID. */
+  string id;
+
+  /** The ID of the dataset this variant set belongs to. */
+  string datasetId;
 
   /**
-  Require that segments abut in order. Also require they are maximal, i.e. that
-  consecutive elements of the array can not be replaced by a single element.
+  The `VariationReference` on which this `VariantSet` is defined.
   */
-  array<Segment> sequence;   
+  string variationReferenceId;
+
+  /** The date this variant set was created in milliseconds from the epoch. */
+  union { null, long } created = null;
+
+  /**
+  The time at which this variant set was last updated in milliseconds from the
+  epoch.
+  */
+  union { null, long } updated = null;
+
+  // We don't list all the CallSets we have calls in because we expect there to
+  // be many more CallSets than VariantSets.
+
+  /**
+  The metadata associated with this variant set. This is equivalent to
+  the VCF header information not already presented in first class fields.
+  */
+  array<VariantSetMetadata> metadata = [];
 }
 
+/**
+Some CallSets reflect genotype calls, while others reflect linked haplotype
+calls.
+*/
 enum CallSetType {
   GENOTYPE,
   HAPLOTYPE
 }
 
+/**
+A `CallSet` is a collection of variant calls for a particular sample. It belongs
+to a `VariantSet`. A GENOTYPE-type CallSet is approximately equivalent to one
+column in VCF.
+*/
 record CallSet {
-  // Would be good to clarify how this relates to the CallSample object in
-  // variants.avdl
-  
+
+  /** The call set ID. */
   string id;
 
-  /**
-  Can use the name here in absence of better sample structure.
-  */
-  string sampleId; 
+  /** The call set name. */
+  union { null, string } name = null;
+
+  /** The sample this call set's data was generated from. */
+  union { null, string } sampleId;
 
   /**
-  A CallSet must be either a genotype or a haplotype. This field specifies
-  which.
+  A `CallSet` must be either a genotype or a haplotype. This field specifies
+  which. A HAPLOTYPE-type `CallSet` is just a bag of `Call`s on the same piece
+  of DNA; there may be more than one way to traverse the graph as a single
+  haplotype.
   */
-  CallSetType callsetType; 
-
-  // For diploid genotypes the copy number of an allele will typically be 0, 1
-  // or 2; for haplotypes it will be 0 or 1
+  CallSetType callsetType;
+  
+  // For diploid genotypes the copy number of a Variant in a Call will typically
+  // be 0, 1 or 2; for haplotypes it will be 0 or 1
 
   /**
-  We may need to say other things about the callset, e.g. derivation.
+  The IDs of the variant sets this call set has calls in. These must all belong
+  to the same Dataset; a CallSet cannot span Datasets.
   */
-  map<string> info = {};
+  array<string> variantSetIds = [];
+
+  /** The date this call set was created in milliseconds from the epoch. */
+  union { null, long } created = null;
+
+  /**
+  The time at which this call set was last updated in milliseconds from the
+  epoch.
+  */
+  union { null, long } updated = null;
+
+  /**
+  A map of additional call set information.
+  */
+  map<array<string>> info = {};
 }
 
+/**
+Represents an occurrence of a `Call` on a single linear molecule of DNA,
+positioned and oriented relative to other occurrences of `Call`s on that same
+piece of DNA. The same call may appear multiple times in the same traversal.
+
+Neested inside the `Call`, since otherwise we would have to give IDs to every
+`Call`.
+*/
+record TraversalMembership {
+  /**
+  ID of the traversal we are asserting occurrence on. The traversal doesn't 
+  exist as a retrievable Traversal object, the ID just unifies all of the
+  occurrences into a single conceptual traversal.
+  */
+  string traversalId;
+  
+  /**
+  Where along the traversal does this occurrence of this `Call` happen?
+  */
+  long position;
+  
+  /**
+  What orientation is the `Variant` represented by this `Call` occurring in at
+  that position in the traversal?
+  */
+  VariantSide orientation;
+}
+
+/**
+A Call is an instance of a Vartiant in a CallSet.
+*/
 record Call {
   /**
-  References an id of CallSet
+  References the ID of the `CallSet` that this Call belongs to.
   */
   string callSetId;
   
   /**
-  References an id of Allele
+  References the ID of the `Variant` that this Call reflects the presence of.
+  May be in the applicable `VariationReference` or in the `VariantSet` instead.
   */ 
-  string alleleID;
+  string variantId;
 
-  // not all of the following will be present, but at least one should be
+  /**
+  HAPLOTYPE-type CallSets double as phase sets, so we don't need phase sets. We
+  do however need these traversals in case we need to disambiguate phasing
+  through some sort of complicated duplication on a single haplotype.
+  
+  Having n of these is an assertion that this `Call` has copy number at least n.
+  The copy number data that occurs later may not contradict that by e.g. listing
+  a nonzero probability for a copy number less than n.
+  
+  TODO: Is there a way to do this while allowing some things in the traversal to
+  maybe not exist?
+  */
+  array<TraversalMembership> traversalMemberships;
+  
+  // We have various ways of specifying what the call actually is.
+  // Not all of the following will be present, but at least one should be
   
   /**
   0 for not present in callSet, 1 for single copy, 2 for 2 copies etc. 
@@ -218,46 +415,12 @@ record Call {
   map<string> evidence = {};
 }
 
-/* 
-The call values in a callset are not explicitly ordered and oriented. This
-reflects typically the data we have about them.  In many cases we can infer
-order and orientation from the reference graph on which the alleles are defined,
-for example for a sequence of simple variants (SNPs, indels etc) along a
-reference.  But in the general case with multiple copies of alleles and
-rearrangements this is not the case.  For when we do want to explicitly state
-the order and orientation of alleles we define a VariantScaffold record.
-*/
 
-record VariantScaffold {
-  string id;
+// Took away the Segments/Alleles method of specifying the presence of arbitrary
+// substrings which may or may not overlap with variants. Do we want to have
+// that capability? Or do we want to force people to make assertions about
+// whether what they called was the same as or distinct from known sequence?
 
-  array<Allele> alleles;
-  
-  /**
-  Orientation of each allele.
-  */
-  array<boolean> isForwards;
-  
-  /**
-  Sizes of gaps between alleles, array length is 1 less than no. of alleles.
-  */
-  array<int> gapSizes = [];   
-}
-
-/*
-Finally, note that while typically an Allele is short, this structure also
-allows us to define a long allele as a literal sequence path through the graph
-incorporating (parts of) multiple variants.
-
-For example, it supports defining alleles to represent ALT haplotypes from
-GRCh38 or an LRG (clinical locus-specific reference sequence) that differs from
-the canonical reference.
-
-Other people may want to define variants on these "Allele" sequences.  It would
-be possible to write code to map those onto the reference graph.  This could
-support mapping variants between coordinate systems.  There has been interesting
-discussion about this in the context of dbSNP and representation of variation on
-multiple references.
-*/
+// VariantScaffolds are now replaced by memberships of calls in traversals.
 
 } // end of protocol

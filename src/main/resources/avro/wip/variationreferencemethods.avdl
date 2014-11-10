@@ -1,4 +1,4 @@
-@namespace("org.ga4gh")
+@namespace("org.ga4gh.wip")
 protocol VariationReferenceMethods {
 
 /*
@@ -12,7 +12,7 @@ import idl "variationReference.avdl";
 
 /******************  /graph/variants/search  *********************/
 /** This request maps to the body of `POST /graph/variants/search` as JSON. */
-record SearchGraphVariantsRequest {
+record SearchVariantsRequest {
 
   /**
   Only return variants joined onto the given variant at the given position in
@@ -43,7 +43,7 @@ record SearchGraphVariantsRequest {
 /**
 This is the response from `POST /graph/variants/search` expressed as JSON.
 */
-record SearchGraphVariantsResponse {
+record SearchVariantsResponse {
   /** The list of matching variants. */
   array<Variant> variants = [];
 
@@ -59,18 +59,18 @@ record SearchGraphVariantsResponse {
 Gets a list of `Variant` matching the search criteria.
 
 `POST /graph/variants/search` must accept a JSON version of
-`SearchGraphVariantsRequest` as the post body and will return a JSON version
-of `SearchGraphVariantsResponse`.
+`SearchVariantsRequest` as the post body and will return a JSON version
+of `SearchVariantsResponse`.
 */
-SearchGraphVariantsResponse searchGraphVariants(
+SearchVariantsResponse searchVariants(
     /**
     This request maps to the body of `POST /graph/variants/search` as JSON.
     */
-    SearchGraphVariantsRequest request) throws GAException;
+    SearchVariantsRequest request) throws org.ga4gh.GAException;
 
 /******************  /graph/alleles/search  *********************/
 /** This request maps to the body of `POST /graph/alleles/search` as JSON. */
-record SearchGraphAllelesRequest {
+record SearchAllelesRequest {
   /**
   Only return the allele with the given ID.
   */
@@ -93,7 +93,7 @@ record SearchGraphAllelesRequest {
 /**
 This is the response from `POST /graph/alleles/search` expressed as JSON.
 */
-record SearchGraphAllelesResponse {
+record SearchAllelesResponse {
   /** The list of matching alleles. */
   array<Allele> alleles = [];
 
@@ -109,18 +109,18 @@ record SearchGraphAllelesResponse {
 Gets a list of `Allele` matching the search criteria.
 
 `POST /graph/alleles/search` must accept a JSON version of
-`SearchGraphAllelesRequest` as the post body and will return a JSON version
-of `SearchGraphAllelesResponse`.
+`SearchAllelesRequest` as the post body and will return a JSON version
+of `SearchAllelesResponse`.
 */
-SearchGraphAllelesResponse searchGraphAlleles(
+SearchAllelesResponse searchAlleles(
     /**
     This request maps to the body of `POST /graph/alleles/search` as JSON.
     */
-    SearchGraphAllelesRequest request) throws GAException;
+    SearchAllelesRequest request) throws org.ga4gh.GAException;
 
 /******************  /graph/callsets/search  *********************/
 /** This request maps to the body of `POST /graph/callsets/search` as JSON. */
-record SearchGraphCallSetsRequest {
+record SearchCallSetsRequest {
 
   /**
   Only return the `CallSet` with exactly this ID.
@@ -154,7 +154,7 @@ record SearchGraphCallSetsRequest {
 /**
 This is the response from `POST /graph/callsets/search` expressed as JSON.
 */
-record SearchGraphCallSetsResponse {
+record SearchCallSetsResponse {
   /** The list of matching call sets. */
   array<CallSet> callSets = [];
 
@@ -173,15 +173,15 @@ Gets a list of `CallSet` matching the search criteria.
 `SearchCallSetsRequest` as the post body and will return a JSON version of
 `SearchCallSetsResponse`.
 */
-SearchGraphCallSetsResponse searchGraphCallSets(
+SearchCallSetsResponse searchCallSets(
     /**
     This request maps to the body of `POST /graph/callsets/search` as JSON.
     */
-    SearchGraphCallSetsRequest request) throws GAException;
+    SearchCallSetsRequest request) throws org.ga4gh.GAException;
 
 /******************  /graph/calls/search  *********************/
 /** This request maps to the body of `POST /graph/calls/search` as JSON. */
-record SearchGraphCallsRequest {
+record SearchCallsRequest {
 
   /**
   Only return the `Call`s in these call sets.
@@ -210,7 +210,7 @@ record SearchGraphCallsRequest {
 /**
 This is the response from `POST /graph/calls/search` expressed as JSON.
 */
-record SearchGraphCallsResponse {
+record SearchCallsResponse {
   /** The list of matching calls. */
   array<Call> calls = [];
 
@@ -226,16 +226,18 @@ record SearchGraphCallsResponse {
 Gets a list of `Call` matching the search criteria.
 
 `POST /graph/calls/search` must accept a JSON version of 
-`SearchGraphCallsRequest` as the post body and will return a JSON version of
-`SearchGraphCallsResponse`.
+`SearchCallsRequest` as the post body and will return a JSON version of
+`SearchCallsResponse`.
 */
-SearchGraphCallsResponse searchGraphCalls(
+SearchCallsResponse searchCalls(
     /** This request maps to the body of `POST /graph/calls/search` as JSON. */
-    SearchGraphCallsRequest request) throws GAException;
+    SearchCallsRequest request) throws org.ga4gh.GAException;
 
 /******************  /graph/variantscaffolds/search  *********************/
-/** This request maps to the body of `POST /graph/variantscaffolds/search` as JSON. */
-record SearchGraphVariantScaffoldsRequest {
+/**
+This request maps to the body of `POST /graph/variantscaffolds/search` as JSON.
+*/
+record SearchVariantScaffoldsRequest {
 
   /**
   Only return the `VariantScaffold` with exactly this ID.
@@ -260,7 +262,7 @@ record SearchGraphVariantScaffoldsRequest {
 This is the response from `POST /graph/variantscaffolds/search` expressed as
 JSON.
 */
-record SearchGraphVariantScaffoldsResponse {
+record SearchVariantScaffoldsResponse {
   /** The list of matching calls. */
   array<Call> calls = [];
 
@@ -276,14 +278,14 @@ record SearchGraphVariantScaffoldsResponse {
 Gets a list of `VariantScaffold` matching the search criteria.
 
 `POST /graph/variantscaffolds/search` must accept a JSON version of
-`SearchGraphVariantScaffoldsRequest` as the post body and will return a JSON
-version of `SearchGraphVariantScaffoldsResponse`.
+`SearchVariantScaffoldsRequest` as the post body and will return a JSON
+version of `SearchVariantScaffoldsResponse`.
 */
-SearchGraphVariantScaffoldsResponse searchGraphVariantScaffolds(
+SearchVariantScaffoldsResponse searchVariantScaffolds(
     /**
     This request maps to the body of `POST /graph/variantscaffolds/search` as
     JSON.
     */
-    SearchGraphVariantScaffoldsRequest request) throws GAException;
+    SearchVariantScaffoldsRequest request) throws org.ga4gh.GAException;
 
 }
