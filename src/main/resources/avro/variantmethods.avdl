@@ -3,86 +3,13 @@ protocol VariantMethods {
 
 import idl "variants.avdl";
 
-/******************  /variantsets/search  *********************/
-/** This request maps to the body of `POST /variantsets/search` as JSON. */
-record SearchVariantSetsRequest {
-  /**
-    If specified, will restrict the query to variant sets within the
-    given datasets.
-  */
-  array<string> datasetIds = [];
-
-  /**
-    Specifies the maximum number of results to return in a single page.
-    If unspecified, a system default will be used.
-  */
-  union { null, int } pageSize = null;
-
-  /**
-    The continuation token, which is used to page through large result sets.
-    To get the next page of results, set this parameter to the value of
-    `nextPageToken` from the previous response.
-  */
-  union { null, string } pageToken = null;
-}
-
-/** This is the response from `POST /variantsets/search` expressed as JSON. */
-record SearchVariantSetsResponse {
-  /** The list of matching variant sets. */
-  array<VariantSet> variantSets = [];
-
-  /**
-    The continuation token, which is used to page through large result sets.
-    Provide this value in a subsequent request to return the next page of
-    results. This field will be empty if there aren't any additional results.
-  */
-  union { null, string } nextPageToken = null;
-}
-
+/******************  /datasets/search  *********************/
 /**
-  Gets a list of `VariantSet` matching the search criteria.
-
-  `POST /variantsets/search` must accept a JSON version of
-  `SearchVariantSetsRequest` as the post body and will return a JSON version
-  of `SearchVariantSetsResponse`.
+This request maps to the body of `POST /datasets/search` as JSON.
 */
-SearchVariantSetsResponse searchVariantSets(
-    /** This request maps to the body of `POST /variantsets/search` as JSON. */
-    SearchVariantSetsRequest request) throws GAException;
+record SearchDatasetsRequest {
 
-/******************  /variants/search  *********************/
-/** This request maps to the body of `POST /variants/search` as JSON. */
-record SearchVariantsRequest {
-  /** Required. The IDs of the variant sets to search over. */
-  array<string> variantSetIds = [];
-
-  /** Only return variants which have exactly this name. */
-  union { null, string } variantName = null;
-
-  /**
-  Only return variant calls which belong to call sets with these IDs.
-  If an empty array, returns variants without any call objects.
-  If null, returns all variant calls.
-  */
-  union { null, array<string> } callSetIds = null;
-
-  /** Required. Only return variants on this reference. */
-  string referenceName;
-
-  /**
-  Required. The beginning of the window (0-based, inclusive) for
-  which overlapping variants should be returned.
-  Genomic positions are non-negative integers less than reference length.
-  Requests spanning the join of circular genomes are represented as
-  two requests one on each side of the join (position 0).
-  */
-  long start;
-
-  /**
-  Required. The end of the window (0-based, exclusive) for which overlapping
-  variants should be returned.
-  */
-  long end;
+  // All you can do with datasets is enumerate which ones are available.
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -98,17 +25,12 @@ record SearchVariantsRequest {
   union { null, string } pageToken = null;
 }
 
-/** This is the response from `POST /variants/search` expressed as JSON. */
-record SearchVariantsResponse {
-  /**
-  The list of matching variants.
-  If the `callSetId` field on the returned calls is not present,
-  the ordering of the call sets from a `SearchCallSetsRequest`
-  over the parent `VariantSet` is guaranteed to match the ordering
-  of the calls on each `Variant`. The number of results will also be
-  the same.
-  */
-  array<Variant> variants = [];
+/**
+This is the response from `POST /datasets/search` expressed as JSON.
+*/
+record SearchDatasetsResponse {
+  /** The list of datasets. */
+  array<string> datasetIds = [];
 
   /**
   The continuation token, which is used to page through large result sets.
@@ -119,14 +41,73 @@ record SearchVariantsResponse {
 }
 
 /**
-Gets a list of `Variant` matching the search criteria.
+Gets a list of dataset IDs accessible through the API.
 
-`POST /variants/search` must accept a JSON version of `SearchVariantsRequest`
-as the post body and will return a JSON version of `SearchVariantsResponse`.
+`POST /datasets/search` must accept a JSON version of
+`SearchDatasetsRequest` as the post body and will return a JSON version
+of `SearchDatasetsResponse`.
 */
-SearchVariantsResponse searchVariants(
-    /** This request maps to the body of `POST /variants/search` as JSON. */
-    SearchVariantsRequest request) throws GAException;
+SearchDatasetsResponse searchDatasets(
+  /**
+  This request maps to the body of `POST /graph/datasets/search` as JSON.
+  */
+  SearchDatasetsRequest request) throws org.ga4gh.GAException;
+
+/******************  /variantsets/search  *********************/
+/** This request maps to the body of `POST /variantsets/search` as JSON. */
+record SearchVariantSetsRequest {
+  /**
+  If specified, will restrict the query to variant sets within the
+  given datasets.
+  */
+  array<string> datasetIds = [];
+  
+  /**
+  If specified, will restrict the query to the variant set with this exact ID.
+  */
+  union { null, string } variantSetId = null;
+
+  /**
+  Specifies the maximum number of results to return in a single page.
+  If unspecified, a system default will be used.
+  */
+  union { null, int } pageSize = null;
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  To get the next page of results, set this parameter to the value of
+  `nextPageToken` from the previous response.
+  */
+  union { null, string } pageToken = null;
+}
+
+/** This is the response from `POST /variantsets/search` expressed as JSON. */
+record SearchVariantSetsResponse {
+  /** The list of matching variant sets. */
+  array<VariantSet> variantSets = [];
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  Provide this value in a subsequent request to return the next page of
+  results. This field will be empty if there aren't any additional results.
+  */
+  union { null, string } nextPageToken = null;
+}
+
+/**
+  Gets a list of `VariantSet` matching the search criteria.
+
+  `POST /variantsets/search` must accept a JSON version of
+  `SearchVariantSetsRequest` as the post body and will return a JSON version
+  of `SearchVariantSetsResponse`.
+*/
+SearchVariantSetsResponse searchVariantSets(
+  /** This request maps to the body of `POST /variantsets/search` as JSON. */
+  SearchVariantSetsRequest request) throws GAException;
+
+// Since there are no Variant objects in the monoallelic model (only
+// `Reference`s holding sequence, and `Segment`s and `Allele`s defined on them)
+// we don't need a variant search method anymore.
 
 /******************  /callsets/search  *********************/
 /** This request maps to the body of `POST /callsets/search` as JSON. */
@@ -138,10 +119,25 @@ record SearchCallSetsRequest {
   array<string> variantSetIds = [];
 
   /**
+  Only return the `CallSet` with exactly this ID.
+  */
+  union { null, string } callSetId = null;
+
+  /**
   Only return call sets for which a substring of the name matches this
   string.
   */
   union { null, string } name = null;
+  
+  /**
+  Return only `CallSet`s with one of these sampleIds.
+  */
+  array<string> sampleIds = [];
+  
+  /**
+  Return only `CallSet`s with the given type.
+  */
+  union { null, CallSetType } callSetType = null;
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -177,6 +173,122 @@ Gets a list of `CallSet` matching the search criteria.
 as the post body and will return a JSON version of `SearchCallSetsResponse`.
 */
 SearchCallSetsResponse searchCallSets(
-    /** This request maps to the body of `POST /callsets/search` as JSON. */
-    SearchCallSetsRequest request) throws GAException;
+  /** This request maps to the body of `POST /callsets/search` as JSON. */
+  SearchCallSetsRequest request) throws GAException;
+  
+/******************  /calls/search  *********************/
+/** This request maps to the body of `POST /calls/search` as JSON. */
+record SearchCallsRequest {
+
+  /**
+  If nonempty, only return the `Call`s in these `CallSet`s.
+  */
+  array<string> callSetIds = [];
+
+  /**
+  If nonempty, return only `Call`s in these `VariantSet`s.
+  */
+  array<string> variantSetIds = [];
+
+  /**
+  If nonempty, return only `Call`s that are on the specified `AlleleScaffold`s.
+  */
+  array<string> alleleScaffoldIds = [];
+
+  /**
+  Specifies the maximum number of results to return in a single page.
+  If unspecified, a system default will be used.
+  */
+  union { null, int } pageSize = null;
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  To get the next page of results, set this parameter to the value of
+  `nextPageToken` from the previous response.
+  */
+  union { null, string } pageToken = null;
+}
+
+/**
+This is the response from `POST /calls/search` expressed as JSON.
+*/
+record SearchCallsResponse {
+  /** The list of matching calls. */
+  array<Call> calls = [];
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  Provide this value in a subsequent request to return the next page of
+  results. This field will be empty if there aren't any additional results.
+  */
+  union { null, string } nextPageToken = null;
+}
+
+/**
+Gets a list of `Call` matching the search criteria.
+
+`POST /calls/search` must accept a JSON version of
+`SearchCallsRequest` as the post body and will return a JSON version of
+`SearchCallsResponse`.
+*/
+SearchCallsResponse searchCalls(
+  /** This request maps to the body of `POST /calls/search` as JSON. */
+  SearchCallsRequest request) throws org.ga4gh.GAException;
+  
+/******************  /allelescaffolds/search  *********************/
+/**
+This request maps to the body of `POST /allelescaffolds/search` as JSON.
+*/
+record SearchAlleleScaffoldsRequest {
+
+  /**
+  If specified, return only `AlleleScaffold`s involving calls in one of the
+  specified callsets.
+  
+  */
+  array<string> callSetIds = [];
+
+  /**
+  Specifies the maximum number of results to return in a single page.
+  If unspecified, a system default will be used.
+  */
+  union { null, int } pageSize = null;
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  To get the next page of results, set this parameter to the value of
+  `nextPageToken` from the previous response.
+  */
+  union { null, string } pageToken = null;
+}
+
+/**
+This is the response from `POST /allelescaffolds/search` expressed as JSON.
+*/
+record SearchAlleleScaffoldsResponse {
+  /** The list of `AlleleScaffold`s. */
+  array<AlleleScaffold> AlleleScaffolds = [];
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  Provide this value in a subsequent request to return the next page of
+  results. This field will be empty if there aren't any additional results.
+  */
+  union { null, string } nextPageToken = null;
+}
+
+/**
+Gets a list of `AlleleScaffold`s matching the search criteria.
+
+`POST /allelescaffolds/search` must accept a JSON version of
+`SearchAlleleScaffoldsRequest` as the post body and will return a JSON
+version of `SearchAlleleScaffoldsResponse`.
+*/
+SearchAlleleScaffoldsResponse searchAlleleScaffolds(
+  /**
+  This request maps to the body of `POST /allelescaffolds/search` as
+  JSON.
+  */
+  SearchAlleleScaffoldsRequest request) throws org.ga4gh.GAException;
+
 }

@@ -1,15 +1,80 @@
 @namespace("org.ga4gh")
 
+/**
+We represent reference genomes, or collections therof, by sequence graphs.
+
+A sequence graph is made progressively joining new sequence pieces, which we
+call `Reference`s, into an existing graph.  This starts with a primary sequence.
+For example consider the primary sequence in GRCh38 for a chromosome. Then
+additional `Reference`s can be joined into it, starting on a defined side of a
+defined base in the existing structure, containing new sequence (potentially
+empty if a pure deletion or breakpoint) and then joining back to another defined
+side of another base in the current graph.
+
+Any base in the graph will have a unique identity defined by its `Reference` id
+and 0-based position in the `Reference` sequence. It is oriented in the
+direction of the `Reference` sequence.
+
+We support a context model for uniquely identifying bases in the graph.
+Currently this is the UCSC left-right mapping proposal as proposed by Paten,
+Haussler et al. - http://arxiv.org/abs/1404.5010
+*/
+
 protocol References {
 
 /**
-A `Reference` is a canonical assembled contig, intended to act as a
-reference coordinate space for other genomic annotations. A single
-`Reference` might represent the human chromosome 1, for instance.
+Each `Reference` in a sequence graph has two sides, PLUS and MINUS.
+
+PLUS represents forwards, or the direction of increasing coordinates, while
+MINUS represents reverse-complement, or the direction of decreasing coordinates.
+*/
+enum ReferenceSide {
+  PLUS,
+  MINUS
+}
+
+
+/**
+`Reference`s are joined into a sequence graph by being connected at their ends
+to positions along other `Reference`s.
+
+*/
+record ReferenceJoinLocation {
+  string referenceId; // id of the reference in which this location is based
+  int position;     // 0-based
+  ReferenceSide side;
+  
+  /**
+  MD5 of the `md5checksum` of the reference being joined onto, the position as a
+  decimal string, and "+" or "-" as appropriate for the side, in that order.
+  Doesn't always have to be included; this field just exists for making sure
+  that the MD5 of a Reference and thus a ReferenceSet is documented and well-
+  defined.
+  
+  */
+  union { null, string } md5checksum = null;
+}
+
+/**
+Represents a chunk of sequence (possibly joined onto other such chunks) that is
+part of a reference graph.
 */
 record Reference {
+
   /** The reference ID. Unique within the repository. */
   string id;
+  
+  /**
+  The ID of the `ReferenceSet` that this reference belongs to, if any.
+  */
+  union { null, string } referenceSetId = null;
+  
+  /**
+  The ID of the `VariantSet` that this reference belongs to, if it does not
+  belong to a `ReferenceSet`.
+  
+  */
+  union { null, string } variantSetId = null;
 
   /** The length of this reference's sequence. */
   long length;
@@ -18,19 +83,14 @@ record Reference {
   MD5 of the upper-case sequence excluding all whitespace characters
   (this is equivalent to SQ:M5 in SAM).
   */
+  string sequenceMd5checksum;
+
+  /**
+  MD5 of the sequenceMd5checksum, the MD5 of the startJoin, and the MD5 of the
+  endJoin, in that order. Note that this means a reference may not join onto
+  itself, or anything that joins onto it, or this hash would not be defined.
+  */
   string md5checksum;
-
-  /**
-  The name of this reference. (e.g. '22') Also see the
-  `names` field on the parent `ReferenceSet`.
-  */
-  string name;
-
-  /**
-  The URI from which the sequence was obtained.
-  Specifies a FASTA format file/string with one name, sequence pair.
-  */
-  union { null, string } sourceURI = null;
 
   /**
   All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
@@ -39,22 +99,29 @@ record Reference {
   array<string> sourceAccessions;
 
   /**
-  A sequence X is said to be derived from source sequence Y, if X and Y
-  are of the same length and the per-base sequence divergence at A/C/G/T bases
-  is sufficiently small. Two sequences derived from the same official
-  sequence share the same coordinates and annotations, and
-  can be replaced with the official sequence for certain use cases.
+  Start and end locations of how this reference fits into the existing graph.
+  May be null only for a primary sequence that is not joined onto any other.
+  Note that the referenceId for start and end may not be the same.
+
   */
-  boolean isDerived = false;
+  union { null, ReferenceJoinLocation } startJoin, endJoin;  
+  
+  /**
+  The sequence to insert between startJoin and endJoin. Must be set if sourceURI
+  is null.  
+  */
+  union { null, string } sequence = null;
+  
+  /**
+  The URI from which the sequence may be obtained, as a FASTA format file with
+  one name, sequence pair. Must be set if sequence is null.
+  */
+  union { null, string } sourceURI = null;
 
   /**
-  The `sourceDivergence` is the fraction of non-indel bases that do not match the
-  reference this record was derived from.
+  We may need to say other things about the reference, e.g. origin, dbSNP...
   */
-  union { null, float } sourceDivergence = null;
-
-  /** ID from http://www.ncbi.nlm.nih.gov/taxonomy (e.g. 9606->human). */
-  union { null, int } ncbiTaxonId = null;
+  map<string> info = {};
 }
 
 /**
@@ -66,8 +133,8 @@ record ReferenceSet {
   /** The reference set ID. Unique in the repository. */
   string id;
 
-  /** The IDs of the `Reference` objects that are part of this set. */
-  array<string> referenceIds = [];
+  // References in the ReferenceSet can be obtained with a searchReferences
+  // call.
 
   /**
   Order-independent MD5 checksum which identifies this `ReferenceSet`. The
