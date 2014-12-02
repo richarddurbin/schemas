@@ -80,23 +80,32 @@ record Reference {
   long length;
 
   /**
+  MD5 of the sequenceMd5checksum, the MD5 of the startJoin, and the MD5 of the
+  endJoin, in that order. Note that this means a reference may not join onto
+  itself, or anything that joins onto it, or this hash would not be defined.
+  */
+  string md5checksum;
+  
+  /**
   MD5 of the upper-case sequence excluding all whitespace characters
   (this is equivalent to SQ:M5 in SAM).
   */
   string sequenceMd5checksum;
 
   /**
-  MD5 of the sequenceMd5checksum, the MD5 of the startJoin, and the MD5 of the
-  endJoin, in that order. Note that this means a reference may not join onto
-  itself, or anything that joins onto it, or this hash would not be defined.
-  */
-  string md5checksum;
-
-  /**
   All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
   with a version number, e.g. `GCF_000001405.26`.
   */
   array<string> sourceAccessions;
+  
+  /**
+  A sequence X is said to be derived from source sequence Y, if X and Y
+  are of the same length and the per-base sequence divergence at A/C/G/T bases
+  is sufficiently small. Two sequences derived from the same official
+  sequence share the same coordinates and annotations, and
+  can be replaced with the official sequence for certain use cases.
+  */
+  union { null, boolean } isDerived = null;
 
   /**
   Start and end locations of how this reference fits into the existing graph.
@@ -117,6 +126,9 @@ record Reference {
   one name, sequence pair. Must be set if sequence is null.
   */
   union { null, string } sourceURI = null;
+
+  /** ID from http://www.ncbi.nlm.nih.gov/taxonomy (e.g. 9606->human). */
+  union { null, int } ncbiTaxonId = null;
 
   /**
   We may need to say other things about the reference, e.g. origin, dbSNP...
