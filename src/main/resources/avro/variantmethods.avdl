@@ -107,7 +107,7 @@ SearchVariantSetsResponse searchVariantSets(
 
 /****************** /variants/search *********************/
 // Since there are no Variant objects in the monoallelic model (only
-// `Reference`s holding sequence, and `Segment`s and `Allele`s defined on them)
+// `Reference`s holding sequence, and `Segment`s and `Variant`s defined on them)
 // we don't need a variant search method anymore. So this method no longer
 // exists.
 
@@ -126,9 +126,9 @@ record SearchCallsRequest {
   array<string> variantSetIds = [];
 
   /**
-  If nonempty, return only `Call`s that are on the specified `AlleleScaffold`s.
+  If nonempty, return only `Call`s that are on the specified `VariantScaffold`s.
   */
-  array<string> alleleScaffoldIds = [];
+  array<string> variantScaffoldIds = [];
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -237,14 +237,14 @@ SearchCallSetsResponse searchCallSets(
   /** This request maps to the body of `POST /callsets/search` as JSON. */
   SearchCallSetsRequest request) throws GAException;
   
-/******************  /allelescaffolds/search  *********************/
+/******************  /variantscaffolds/search  *********************/
 /**
-This request maps to the body of `POST /allelescaffolds/search` as JSON.
+This request maps to the body of `POST /variantscaffolds/search` as JSON.
 */
-record SearchAlleleScaffoldsRequest {
+record SearchVariantScaffoldsRequest {
 
   /**
-  If specified, return only `AlleleScaffold`s involving calls in one of the
+  If specified, return only `VariantScaffold`s involving calls in one of the
   specified callsets.
   
   */
@@ -265,11 +265,11 @@ record SearchAlleleScaffoldsRequest {
 }
 
 /**
-This is the response from `POST /allelescaffolds/search` expressed as JSON.
+This is the response from `POST /variantscaffolds/search` expressed as JSON.
 */
-record SearchAlleleScaffoldsResponse {
-  /** The list of `AlleleScaffold`s. */
-  array<AlleleScaffold> AlleleScaffolds = [];
+record SearchVariantScaffoldsResponse {
+  /** The list of `VariantScaffold`s. */
+  array<VariantScaffold> VariantScaffolds = [];
 
   /**
   The continuation token, which is used to page through large result sets.
@@ -280,17 +280,17 @@ record SearchAlleleScaffoldsResponse {
 }
 
 /**
-Gets a list of `AlleleScaffold`s matching the search criteria.
+Gets a list of `VariantScaffold`s matching the search criteria.
 
-`POST /allelescaffolds/search` must accept a JSON version of
-`SearchAlleleScaffoldsRequest` as the post body and will return a JSON
-version of `SearchAlleleScaffoldsResponse`.
+`POST /variantscaffolds/search` must accept a JSON version of
+`SearchVariantScaffoldsRequest` as the post body and will return a JSON
+version of `SearchVariantScaffoldsResponse`.
 */
-SearchAlleleScaffoldsResponse searchAlleleScaffolds(
+SearchVariantScaffoldsResponse searchVariantScaffolds(
   /**
-  This request maps to the body of `POST /allelescaffolds/search` as
+  This request maps to the body of `POST /variantscaffolds/search` as
   JSON.
   */
-  SearchAlleleScaffoldsRequest request) throws org.ga4gh.GAException;
+  SearchVariantScaffoldsRequest request) throws org.ga4gh.GAException;
 
 }
