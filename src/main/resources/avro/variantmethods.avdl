@@ -57,7 +57,7 @@ SearchDatasetsResponse searchDatasets(
 /** This request maps to the body of `POST /variantsets/search` as JSON. */
 record SearchVariantSetsRequest {
   /**
-  If specified, will restrict the query to variant sets within the
+  If nonempty, will restrict the query to variant sets within the
   given datasets.
   */
   array<string> datasetIds = [];
@@ -105,11 +105,67 @@ SearchVariantSetsResponse searchVariantSets(
   /** This request maps to the body of `POST /variantsets/search` as JSON. */
   SearchVariantSetsRequest request) throws GAException;
 
-/****************** /variants/search *********************/
-// Since there are no Variant objects in the monoallelic model (only
-// `Reference`s holding sequence, and `Segment`s and `Variant`s defined on them)
-// we don't need a variant search method anymore. So this method no longer
-// exists.
+/******************  /variants/search  *********************/
+/** This request maps to the body of `POST /variants/search` as JSON. */
+record SearchVariantsRequest {
+
+  /**
+  If nonempty, only return `Variant`s with IDs on this list.
+  */
+  array<string> variantIds = [];
+
+  /**
+  If nonempty, only return `Variant`s defined in one of the specified
+  `VariantSet`s.
+  */
+  array<string> variantSetIds = [];
+
+  /**
+  If nonempty, only return `Variant`s including at least one `Segment` of a
+  `Reference` with an ID on this list.
+  */
+  array<string> referenceIds = [];
+
+  /**
+  Specifies the maximum number of results to return in a single page.
+  If unspecified, a system default will be used.
+  */
+  union { null, int } pageSize = null;
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  To get the next page of results, set this parameter to the value of
+  `nextPageToken` from the previous response.
+  */
+  union { null, string } pageToken = null;
+}
+
+/**
+This is the response from `POST /variants/search` expressed as JSON.
+*/
+record SearchVariantsResponse {
+  /** The list of matching `Variant`s. */
+  array<Variant> variants = [];
+
+  /**
+  The continuation token, which is used to page through large result sets.
+  Provide this value in a subsequent request to return the next page of
+  results. This field will be empty if there aren't any additional results.
+  */
+  union { null, string } nextPageToken = null;
+}
+
+/**
+Gets a list of `Variant`s matching the search criteria.
+
+`POST /variants/search` must accept a JSON version of `SearchVariantsRequest` as
+the post body and will return a JSON version of `SearchVariantsResponse`.
+*/
+SearchVariantsResponse searchVariants(
+    /**
+    This request maps to the body of `POST /variants/search` as JSON.
+    */
+    SearchVariantsRequest request) throws org.ga4gh.GAException;
 
 /******************  /calls/search  *********************/
 /** This request maps to the body of `POST /calls/search` as JSON. */
@@ -124,11 +180,11 @@ record SearchCallsRequest {
   If nonempty, return only `Call`s in these `VariantSet`s.
   */
   array<string> variantSetIds = [];
-
+  
   /**
-  If nonempty, return only `Call`s that are on the specified `VariantScaffold`s.
+  If nonempty, return only `Call`s invloving one of these `Variant`s.
   */
-  array<string> variantScaffoldIds = [];
+  array<string> variantIds = [];
 
   /**
   Specifies the maximum number of results to return in a single page.
@@ -174,7 +230,7 @@ SearchCallsResponse searchCalls(
 /** This request maps to the body of `POST /callsets/search` as JSON. */
 record SearchCallSetsRequest {
   /**
-  If specified, will restrict the query to call sets within the
+  If nonempty, will restrict the query to call sets within the
   given variant sets.
   */
   array<string> variantSetIds = [];
@@ -244,11 +300,16 @@ This request maps to the body of `POST /variantscaffolds/search` as JSON.
 record SearchVariantScaffoldsRequest {
 
   /**
-  If specified, return only `VariantScaffold`s involving calls in one of the
+  If nonempty, return only `VariantScaffold`s involving calls in one of the
   specified callsets.
-  
   */
   array<string> callSetIds = [];
+  
+  /**
+  If nonempty, return only `VariantScaffold`s invloving calls on one of the
+  specified `Variant`s.
+  */
+  array<string> variantIds = [];
 
   /**
   Specifies the maximum number of results to return in a single page.
