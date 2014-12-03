@@ -95,37 +95,6 @@ record VariantSet {
 }
 
 /**
-A `Segment` is a substring of a `Reference`. One or more `Segment`s (possibly
-from different `Reference`s) can be strung together end to end to form an
-`Allele` describing some sequence that may or may not actually occur in a
-sample.
-
-Note that a `Segment` can be 0-length, especially if it is representing the
-entirety of a 0-length `Allele`.
-*/
-record Segment {
-  /**
-  References an id of the `Reference` from which this `Segment` is sliced.
-  */
-  string referenceId;
-  
-  /**
-  0-based start position along the `Reference`, inclusive.
-  */
-  long start;
-  
-  /**
-  Number of DNA bases in the `Segment`.
-  */
-  long length;
-    
-  /**
-  Orientation in which the `Segment` appears in its `Allele`.
-  */     
-  ReferenceSide side; 
-}
-
-/**
 An Allele is a contigous piece of sequence that we will want to say is present
 (in general at some copy number) or absent in a sample.  Very often it will just
 be a single segment covering the entirety of a novel `Reference`, but it is also
@@ -148,10 +117,12 @@ record Allele {
   string variantSetId;  
 
   /**
-  Require that segments abut in order. Also require they are maximal, i.e. that
-  consecutive elements of the array can not be replaced by a single element.
+  What `Segment`s of what `Reference`s in what order constitute this `Allele`?
+  
+  Note that a `Segment` in this `Path` that is 0-length represents the adjacency
+  immediately before the named base.
   */
-  array<Segment> sequence;   
+  Path path; 
 }
 
 /**
