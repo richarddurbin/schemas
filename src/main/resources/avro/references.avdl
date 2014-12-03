@@ -91,6 +91,12 @@ record Reference {
   (this is equivalent to SQ:M5 in SAM).
   */
   string sequenceMd5checksum;
+  
+  /**
+  The name of this reference within its `ReferenceSet` (e.g. '22'). Also see the
+  `names` field on the parent `ReferenceSet`.
+  */
+  string name;
 
   /**
   All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
