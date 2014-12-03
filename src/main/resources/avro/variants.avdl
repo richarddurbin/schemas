@@ -125,7 +125,7 @@ record Segment {
   ReferenceSide side; 
 }
 
-/*
+/**
 An Allele is a contigous piece of sequence that we will want to say is present
 (in general at some copy number) or absent in a sample.  Very often it will just
 be a single segment covering the entirety of a novel `Reference`, but it is also
@@ -271,7 +271,7 @@ record Call {
   map<array<string>> info = {};
 }
 
-/*
+/**
 The `Call`s in a `CallSet` are not explicitly ordered and oriented. This
 reflects typically the data we have about them. In many cases we can infer order
 and orientation from the reference graph on which the `Allele`s are defined, for

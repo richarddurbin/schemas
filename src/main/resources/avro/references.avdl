@@ -196,4 +196,6 @@ record ReferenceSet {
   boolean isDerived = false;
 }
 
+// Positions, Segments, and Paths on references are all defined in common.avdl.
+
 }
