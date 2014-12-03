@@ -108,6 +108,12 @@ record SearchReferencesRequest {
   array<string> accessions = [];
   
   /**
+  If nonempty, return references that are joined onto references with one of the
+  specified IDs.
+  */
+  array<string> parentReferenceIds = [];
+  
+  /**
   If nonempty, return references that are in one of the specified
   `ReferenceSet`s.
   */
