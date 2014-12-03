@@ -63,11 +63,6 @@ record SearchVariantSetsRequest {
   array<string> datasetIds = [];
   
   /**
-  If specified, will restrict the query to the variant set with this exact ID.
-  */
-  union { null, string } variantSetId = null;
-
-  /**
   Specifies the maximum number of results to return in a single page.
   If unspecified, a system default will be used.
   */
@@ -104,15 +99,21 @@ record SearchVariantSetsResponse {
 SearchVariantSetsResponse searchVariantSets(
   /** This request maps to the body of `POST /variantsets/search` as JSON. */
   SearchVariantSetsRequest request) throws GAException;
+  
+/****************  /variantsets/{id}  *******************/
+/**
+Gets a `VariantSet` by ID.
+`GET /variantsets/{id}` will return a JSON version of `VariantSet`.
+*/
+VariantSet getVariantSet(
+    /**
+    The ID of the `VariantSet`.
+    */
+    string id) throws GAException;
 
 /******************  /variants/search  *********************/
 /** This request maps to the body of `POST /variants/search` as JSON. */
 record SearchVariantsRequest {
-
-  /**
-  If nonempty, only return `Variant`s with IDs on this list.
-  */
-  array<string> variantIds = [];
 
   /**
   If nonempty, only return `Variant`s defined in one of the specified
@@ -166,6 +167,17 @@ SearchVariantsResponse searchVariants(
     This request maps to the body of `POST /variants/search` as JSON.
     */
     SearchVariantsRequest request) throws org.ga4gh.GAException;
+    
+/****************  /variants/{id}  *******************/
+/**
+Gets a `Variant` by ID.
+`GET /variants/{id}` will return a JSON version of `Variant`.
+*/
+Variant getVariant(
+    /**
+    The ID of the `Variant`.
+    */
+    string id) throws GAException;
 
 /******************  /calls/search  *********************/
 /** This request maps to the body of `POST /calls/search` as JSON. */
@@ -236,11 +248,6 @@ record SearchCallSetsRequest {
   array<string> variantSetIds = [];
 
   /**
-  Only return the `CallSet` with exactly this ID.
-  */
-  union { null, string } callSetId = null;
-
-  /**
   Only return call sets for which a substring of the name matches this
   string.
   */
@@ -292,6 +299,17 @@ as the post body and will return a JSON version of `SearchCallSetsResponse`.
 SearchCallSetsResponse searchCallSets(
   /** This request maps to the body of `POST /callsets/search` as JSON. */
   SearchCallSetsRequest request) throws GAException;
+
+/****************  /callsets/{id}  *******************/
+/**
+Gets a `CallSet` by ID.
+`GET /callsets/{id}` will return a JSON version of `CallSet`.
+*/
+CallSet getCallSet(
+    /**
+    The ID of the `CallSet`.
+    */
+    string id) throws GAException;
   
 /******************  /variantscaffolds/search  *********************/
 /**
