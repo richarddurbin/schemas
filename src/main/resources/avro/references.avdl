@@ -80,9 +80,16 @@ record Reference {
   long length;
 
   /**
-  MD5 of the sequenceMd5checksum, the MD5 of the startJoin, and the MD5 of the
-  endJoin, in that order. Note that this means a reference may not join onto
-  itself, or anything that joins onto it, or this hash would not be defined.
+  MD5 checksum uniquely representing this `Reference`.
+  
+  If startJoin and endJoin are null, this is equal to sequenceMd5checksum.
+  
+  Otherwise, this is the MD5 of the sequenceMd5checksum, startJoin.md5checksum,
+  and endJoin.md5checksum, in that order. If either startJoin or endJoin is
+  null, an md5checksum consisting of all 0s is used for its contribution.
+  
+  Note that this means a reference may not join onto itself, or anything that
+  joins onto it, or this hash would not be defined.
   */
   string md5checksum;
   
