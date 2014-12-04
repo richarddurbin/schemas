@@ -85,7 +85,7 @@ record VariantSet {
   string datasetId;
 
   /**
-  The `ReferenceSet` on which this `VariantSet` is defined.
+  The `ReferenceSet` the `Variant`s in this `VariantSet` are using.
   */
   string referenceSetId;
 

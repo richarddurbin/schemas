@@ -92,6 +92,12 @@ This request maps to the body of `POST /references/search`
 as JSON.
 */
 record SearchReferencesRequest {
+
+  /**
+  If present, return only references which belong to this reference set.
+  */
+  union { null, string } referenceSetId = null;
+
   /**
   If nonempty, return references which match any of the given `md5checksums`.
   See `Reference::md5checksum` for details.
@@ -112,12 +118,6 @@ record SearchReferencesRequest {
   specified IDs.
   */
   array<string> parentReferenceIds = [];
-  
-  /**
-  If nonempty, return references that are in one of the specified
-  `ReferenceSet`s.
-  */
-  array<string> referenceSetIds = [];
   
   /**
   If nonempty, return references that have one of the specified names.
