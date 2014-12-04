@@ -81,7 +81,10 @@ record VariantSet {
   /** The variant set ID. */
   string id;
 
-  /** The ID of the dataset this variant set belongs to. */
+  /**
+  The ID of the dataset this variant set belongs to.
+  TODO: Dataset enumeration is in the reads API.
+  */
   string datasetId;
 
   /**
