@@ -321,5 +321,4 @@ SearchVariantScaffoldsResponse searchVariantScaffolds(
   JSON.
   */
   SearchVariantScaffoldsRequest request) throws org.ga4gh.GAException;
-
 }
