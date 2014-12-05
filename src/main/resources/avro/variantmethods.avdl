@@ -204,14 +204,14 @@ record SearchCallSetsRequest {
   union { null, string } name = null;
   
   /**
-  Return only `CallSet`s with one of these sampleIds.
-  */
-  array<string> sampleIds = [];
-  
-  /**
   Return only `CallSet`s with the given type.
   */
   union { null, CallSetType } callSetType = null;
+
+  /**
+  Return only `CallSet`s with one of these sampleIds.
+  */
+  array<string> sampleIds = [];
 
   /**
   Specifies the maximum number of results to return in a single page.

@@ -181,7 +181,6 @@ record CallSet {
   /**
   The time at which this call set was last updated in milliseconds from the
   epoch.
-  
   */
   union { null, long } updated = null;
 
