@@ -7,8 +7,8 @@ import idl "variants.avdl";
 /** This request maps to the body of `POST /variantsets/search` as JSON. */
 record SearchVariantSetsRequest {
   /**
-    If specified, will restrict the query to variant sets within the
-    given datasets.
+  If nonempty, will restrict the query to variant sets within the given
+  `Dataset`s. TODO: `Dataset` enumeration is in the Reads API.
   */
   array<string> datasetIds = [];
 
