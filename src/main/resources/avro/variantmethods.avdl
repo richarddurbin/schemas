@@ -267,8 +267,6 @@ This request maps to the body of `POST /variantscaffolds/search` as JSON.
 */
 record SearchVariantScaffoldsRequest {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /**
   If nonempty, return only `VariantScaffold`s involving calls in one of the
   specified callsets.
