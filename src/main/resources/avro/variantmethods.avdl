@@ -47,8 +47,8 @@ Gets a list of `VariantSet` matching the search criteria.
 of `SearchVariantSetsResponse`.
 */
 SearchVariantSetsResponse searchVariantSets(
-    /** This request maps to the body of `POST /variantsets/search` as JSON. */
-    SearchVariantSetsRequest request) throws GAException;
+  /** This request maps to the body of `POST /variantsets/search` as JSON. */
+  SearchVariantSetsRequest request) throws GAException;
 
 /******************  /variants/search  *********************/
 /** This request maps to the body of `POST /variants/search` as JSON. */
@@ -125,8 +125,8 @@ Gets a list of `Variant` matching the search criteria.
 as the post body and will return a JSON version of `SearchVariantsResponse`.
 */
 SearchVariantsResponse searchVariants(
-    /** This request maps to the body of `POST /variants/search` as JSON. */
-    SearchVariantsRequest request) throws GAException;
+  /** This request maps to the body of `POST /variants/search` as JSON. */
+  SearchVariantsRequest request) throws GAException;
 
 /******************  /callsets/search  *********************/
 /** This request maps to the body of `POST /callsets/search` as JSON. */
@@ -177,8 +177,8 @@ Gets a list of `CallSet` matching the search criteria.
 as the post body and will return a JSON version of `SearchCallSetsResponse`.
 */
 SearchCallSetsResponse searchCallSets(
-    /** This request maps to the body of `POST /callsets/search` as JSON. */
-    SearchCallSetsRequest request) throws GAException;
+  /** This request maps to the body of `POST /callsets/search` as JSON. */
+  SearchCallSetsRequest request) throws GAException;
 
 /****************  /callsets/{id}  *******************/
 /**
@@ -186,9 +186,9 @@ Gets a `CallSet` by ID.
 `GET /callsets/{id}` will return a JSON version of `CallSet`.
 */
 CallSet getCallSet(
-    /**
-    The ID of the `CallSet`.
-    */
-    string id) throws GAException;
+  /**
+  The ID of the `CallSet`.
+  */
+  string id) throws GAException;
 
 }
