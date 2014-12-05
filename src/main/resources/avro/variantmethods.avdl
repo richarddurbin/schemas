@@ -56,10 +56,10 @@ Gets a `VariantSet` by ID.
 `GET /variantsets/{id}` will return a JSON version of `VariantSet`.
 */
 VariantSet getVariantSet(
-    /**
-    The ID of the `VariantSet`.
-    */
-    string id) throws GAException;
+  /**
+  The ID of the `VariantSet`.
+  */
+  string id) throws GAException;
 
 /******************  /variants/search  *********************/
 /** This request maps to the body of `POST /variants/search` as JSON. */
@@ -113,21 +113,21 @@ Gets a list of `Variant`s matching the search criteria.
 the post body and will return a JSON version of `SearchVariantsResponse`.
 */
 SearchVariantsResponse searchVariants(
-    /**
-    This request maps to the body of `POST /variants/search` as JSON.
-    */
-    SearchVariantsRequest request) throws org.ga4gh.GAException;
-    
+  /**
+  This request maps to the body of `POST /variants/search` as JSON.
+  */
+  SearchVariantsRequest request) throws org.ga4gh.GAException;
+
 /****************  /variants/{id}  *******************/
 /**
 Gets a `Variant` by ID.
 `GET /variants/{id}` will return a JSON version of `Variant`.
 */
 Variant getVariant(
-    /**
-    The ID of the `Variant`.
-    */
-    string id) throws GAException;
+  /**
+  The ID of the `Variant`.
+  */
+  string id) throws GAException;
 
 /******************  /calls/search  *********************/
 /** This request maps to the body of `POST /calls/search` as JSON. */
@@ -256,10 +256,10 @@ Gets a `CallSet` by ID.
 `GET /callsets/{id}` will return a JSON version of `CallSet`.
 */
 CallSet getCallSet(
-    /**
-    The ID of the `CallSet`.
-    */
-    string id) throws GAException;
+  /**
+  The ID of the `CallSet`.
+  */
+  string id) throws GAException;
   
 /******************  /variantscaffolds/search  *********************/
 /**
