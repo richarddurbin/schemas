@@ -40,11 +40,11 @@ record SearchVariantSetsResponse {
 }
 
 /**
-  Gets a list of `VariantSet` matching the search criteria.
+Gets a list of `VariantSet` matching the search criteria.
 
-  `POST /variantsets/search` must accept a JSON version of
-  `SearchVariantSetsRequest` as the post body and will return a JSON version
-  of `SearchVariantSetsResponse`.
+`POST /variantsets/search` must accept a JSON version of
+`SearchVariantSetsRequest` as the post body and will return a JSON version
+of `SearchVariantSetsResponse`.
 */
 SearchVariantSetsResponse searchVariantSets(
     /** This request maps to the body of `POST /variantsets/search` as JSON. */
