@@ -1,0 +1,71 @@
+@namespace("org.ga4gh.interchange")
+
+/**
+Certain relationships between GA4GH data model are only exposed through API
+endpoints; here we define types that are necessary for representing these
+relationships on disk, for simple interchange of small data sets.
+
+Most of these relationships are many-to-many. For example, a CallSet 
+
+The interchange format consists of a directory containing:
+
+* A FASTA-format file containing any sequences to be exchanged, named
+"sequences.fa". The FASTA ID for each sequence will be equal to the sequence's
+ID value.
+
+* For each top-level type to be exchanged, an Avro binary format file containing
+all the records of that type in arbitrary order, named "<RecordType>.avro". For
+example, all `Read` records will be in "Read.avro", all `VariantSet` will be in
+`VariantSet.avro`, and so on. There will not, however, be a `Segment.avdl` file,
+as `Segment` objects are not top-level records: they occur only as part of other
+records.
+
+Directories in this interchange format will be importable by the GA4GH reference
+server.
+*/
+protocol Interchange {
+
+/**
+The many-to-many relationship between `ReferenceSet`s and their contained
+`Reference`s is covered by `ReferenceSet.referenceIds`. However, there may be a
+very large number of `Reference`s in a `ReferenceSet`, so we allow them to be
+represented by objects instead of very long arrays in
+`ReferenceSet.referenceIds`.
+*/
+record ReferenceSetReferenceJoin {
+  /**
+  The ID of the `ReferenceSet`.
+  */
+  string referenceSetId;
+  
+  /**
+  The ID of a `Reference` that is in that set. Note that a `Reference` can be in
+  many `ReferenceSet`s.
+  */
+  string referenceId;
+}
+
+// The many-to-many relationship between `Variant`s and `Allele`s is
+// covered by `Variant.alleleIds`
+
+// The many-to-many relationship between `CallSet`s and `VariantSet`s is
+// covered by `CallSet.variantSetIds`
+
+/**
+The one-to-many relationship between `VariantSet`s and their novel sequences is
+exposed only through the `searchVariantSetSequences()` method, so we define a
+record to represent that relationship here.
+*/
+record VariantSetSequenceJoin {
+  /**
+  The ID of the `VariantSet`.
+  */
+  string variantSetId;
+  
+  /**
+  The ID of a sequence that is a novel sequence in that `VaraintSet`.
+  */
+  string sequenceId;
+}
+
+}
