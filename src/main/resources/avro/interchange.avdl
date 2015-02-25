@@ -10,7 +10,7 @@ Most of these relationships are many-to-many. For example, a CallSet
 The interchange format consists of a directory containing:
 
 * A FASTA-format file containing any sequences to be exchanged, named
-"sequences.fa". The FASTA ID for each sequence will be equal to the sequence's
+"Sequence.fa". The FASTA ID for each sequence will be equal to the sequence's
 ID value.
 
 * For each top-level type to be exchanged, an Avro binary format file containing
@@ -52,20 +52,22 @@ record ReferenceSetReferenceJoin {
 // covered by `CallSet.variantSetIds`
 
 /**
-The one-to-many relationship between `VariantSet`s and their novel sequences is
-exposed only through the `searchVariantSetSequences()` method, so we define a
-record to represent that relationship here.
+The end joins of novel sequences used in `VariantSet`s are exposed only through
+the `searchVariantSetSequences()` and `getVariantSetSequence()` methods, so we
+define a record to represent novel sequences in `VariantSet`s here.
 */
-record VariantSetSequenceJoin {
+record VariantSetSequence {
   /**
   The ID of the `VariantSet`.
   */
   string variantSetId;
   
   /**
-  The ID of a sequence that is a novel sequence in that `VaraintSet`.
+  The sequence that is a novel sequence in that `VaraintSet`, with its
+  `startJoin` and `endJoin` describing where the sequence belongs in the
+  sequence graph.
   */
-  string sequenceId;
+  Segment sequence;
 }
 
 }
