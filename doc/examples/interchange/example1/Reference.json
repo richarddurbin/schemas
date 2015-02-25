@@ -1,0 +1,63 @@
+{
+  "segment": {
+    "org.ga4gh.models.Segment": {
+      "start": {
+        "referenceName": null,
+        "sequenceId": {"string": "1"},
+        "position": 0,
+        "strand": "POS_STRAND"
+      },
+      "length": 240,
+      "startJoin": null,
+      "endJoin": null
+    }
+  },
+  "id": null,
+  "length": 240,
+  "md5checksum": "866f24e288ddbddce3e767a6d12afae1",
+  "name": "ref",
+  "sourceURI": null,
+  "sourceAccessions": [],
+  "isDerived": false,
+  "sourceDivergence": null,
+  "ncbiTaxonId": null
+}
+{
+  "segment": {
+    "org.ga4gh.models.Segment": {
+      "start": {
+        "referenceName": null,
+        "sequenceId": {"string": "2"},
+        "position": 0,
+        "strand": "POS_STRAND"
+      },
+      "length": 34,
+      "startJoin": {
+        "org.ga4gh.models.Position": {
+          "referenceName": null,
+          "sequenceId": {"string": "1"},
+          "position": 50,
+          "strand": "NEG_STRAND"
+        }
+      },
+      "endJoin": {
+        "org.ga4gh.models.Position": {
+          "referenceName": null,
+          "sequenceId": {"string": "1"},
+          "position": 60,
+          "strand": "POS_STRAND"
+        }
+      }
+    }
+  },
+  "id": null,
+  "length": 34,
+  "md5checksum": "57a2ee9551e4f3a022c75767ac77c024",
+  "name": "alt",
+  "sourceURI": null,
+  "sourceAccessions": [],
+  "isDerived": false,
+  "sourceDivergence": null,
+  "ncbiTaxonId": null
+}
+  

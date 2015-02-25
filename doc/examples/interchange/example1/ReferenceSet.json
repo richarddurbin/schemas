@@ -1,0 +1,16 @@
+{
+  "id": "tinygenome",
+  "referenceIds": {
+    "array": ["1", "2"]
+  },
+  "md5checksum": "a241ec7c514e6095d2491224d878ab86",
+  "ncbiTaxonId": null,
+  "description": {
+    "string": "An example ReferenceSet for a toy genome, with a reference and an alt locus."
+  },
+  "assemblyId": null,
+  "sourceURI": null,
+  "sourceAccessions": [],
+  "isDerived": false
+}
+
