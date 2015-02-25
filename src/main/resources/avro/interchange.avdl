@@ -25,6 +25,8 @@ server.
 */
 protocol Interchange {
 
+import idl "common.avdl";
+
 /**
 The many-to-many relationship between `ReferenceSet`s and their contained
 `Reference`s is covered by `ReferenceSet.referenceIds`. However, there may be a
@@ -67,7 +69,7 @@ record VariantSetSequence {
   `startJoin` and `endJoin` describing where the sequence belongs in the
   sequence graph.
   */
-  Segment sequence;
+  org.ga4gh.models.Segment sequence;
 }
 
 }
