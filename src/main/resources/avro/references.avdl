@@ -121,7 +121,7 @@ getReferenceJoins().
 record ReferenceSet {
   /** The reference set ID. Unique in the repository. */
   string id;
-
+  
   /**
   The IDs of the `Reference` objects that are part of this set.
 
@@ -130,12 +130,20 @@ record ReferenceSet {
   `searchReferences()` API call.
   */
   union { null, array<string> } referenceIds = null;
+  
+  /**
+  The IDs of `ReferenceSet`s that are included in this set, allowing extension
+  from a core e.g. provided by GRC or another provider.  In particular this 
+  may provide a basis of primary references for a graph mode reference set.
+  */
+
+  array<string> includedReferenceSets = null;
 
   /**
   Order-independent MD5 checksum which identifies this `ReferenceSet`. The
   checksum is computed by sorting all `reference.md5checksum` (for all
-  `reference` in this set) in ascending lexicographic order, concatenating,
-  and taking the MD5 of that value.
+  `reference` in this set, including any in any included set) in ascending 
+  lexicographic order, concatenating, and taking the MD5 of that value.
   */
   string md5checksum;
 
