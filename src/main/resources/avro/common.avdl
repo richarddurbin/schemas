@@ -310,7 +310,7 @@ Richard and Adam removed NO_STRAND.  Instead have a union with null if you want 
 */
 enum Strand {
   POS_STRAND,
-  NEG_STRAND,
+  NEG_STRAND
 }
 
 /**
